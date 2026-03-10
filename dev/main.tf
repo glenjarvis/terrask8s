@@ -10,7 +10,7 @@ terraform {
 
   #  backend "s3" {
   #    bucket = "<bucket name>"
-  #    key    = "<see output>
+  #    key    = "<see output>"
   #    region = "<see output>"
   #
   #    dynamodb_table = "terraform-lock"
@@ -33,5 +33,6 @@ module "terrask8s_vpc" {
 module "terrask8s_security" {
   source = "../modules/terrask8s/security"
   vpc_id = module.terrask8s_vpc.vpc_id
-  home_office_ip = ["${var.home_office_ip}/32"]
+  allowed_ssh_cidr_blocks = ["${var.home_office_ip}/32"]
+  environment = "dev"
 }

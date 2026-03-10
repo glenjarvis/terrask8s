@@ -1,6 +1,15 @@
 data "aws_availability_zones" "available" {
   state = "available"
+
+  # Exclude Local Zones and Wavelength Zones. Without this filter, accounts that
+  # have opted into those zones will see them returned as "available", which can
+  # cause subnet creation to fail due to unsupported instance types or services.
+  filter {
+    name   = "opt-in-status"
+    values = ["opt-in-not-required"]
+  }
 }
+
 
 locals {
   az_count = min(
@@ -16,6 +25,8 @@ resource "aws_vpc" "main" {
   cidr_block = var.cidr_block
 
   tags = merge(var.tags, {
+    Name        = "terrask8s-vpc"
+    Project     = var.project
     Environment = var.environment
   })
 }
@@ -25,6 +36,12 @@ resource "aws_subnet" "terrask8s_subnet" {
   vpc_id            = aws_vpc.main.id
   cidr_block        = cidrsubnet(var.cidr_block, local.cidr_bits, count.index)
   availability_zone = data.aws_availability_zones.available.names[count.index]
+
+  tags = merge(var.tags, {
+    Name        = "terrask8s-subnet-${count.index}"
+    Project     = var.project
+    Environment = var.environment
+  })
 }
 
 resource "aws_route_table" "terrask8s" {
@@ -36,6 +53,8 @@ resource "aws_route_table" "terrask8s" {
   }
 
   tags = merge(var.tags, {
+    Name        = "terrask8s-route-table"
+    Project     = var.project
     Environment = var.environment
   })
 }
@@ -50,10 +69,20 @@ resource "aws_internet_gateway" "main" {
   vpc_id = aws_vpc.main.id
 
   tags = merge(var.tags, {
+    Name        = "terrask8s-igw"
+    Project     = var.project
     Environment = var.environment
   })
 }
 
 output "vpc_id" {
   value = aws_vpc.main.id
+}
+
+output "subnet_ids" {
+  value = aws_subnet.terrask8s_subnet[*].id
+}
+
+output "subnet_azs" {
+  value = aws_subnet.terrask8s_subnet[*].availability_zone
 }

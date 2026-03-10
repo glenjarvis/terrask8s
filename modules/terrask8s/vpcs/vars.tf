@@ -1,7 +1,22 @@
+variable "project" {
+  description = "Name of project using VPC"
+  type        = string
+  default     = "terrask8s"
+
+  validation {
+    condition     = length(trim(var.project, " ")) > 0
+    error_message = "project must be a non-empty string."
+  }
+}
 
 variable "environment" {
-  description = ""
+  description = "Deployment environment (e.g. dev, stage, prod)."
   type        = string
+
+  validation {
+    condition     = length(trim(var.environment, " ")) > 0
+    error_message = "environment must be a non-empty string (e.g. dev, stage, prod)."
+  }
 }
 
 variable "az_count" {
@@ -28,7 +43,5 @@ variable "cidr_block" {
 variable "tags" {
   description = "Tags for VPC"
   type        = map(string)
-  default = {
-    Project = "terrask8s"
-  }
+  default = {}
 }
