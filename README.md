@@ -14,7 +14,7 @@ This repository is for learning. If you want to understand what's happening unde
 
 ### For me
 
-A job interview came up for a Terraform and AWS position. I had done both for years, but had been working with different technology for a while and was rusty. The best way to get unrusty is to build something.
+A job interview came up for a Terraform and AWS DevOps position. I had done both for years, but had recently been working with different technology and my Terraform was rusty. The best way to get unrusty is to build something.
 
 I've done Terraform, Ansible, and Kubernetes in past jobs, so why not build a Terraform repository that creates a Kubernetes cluster? There may be room for Ansible in configuration management down the road, but the MVP focuses on Terraform.
 
@@ -36,17 +36,9 @@ See [bootstrap/README.md](bootstrap/README.md) for full details, including how t
 
 After `apply` completes, Terraform will print a `project_s3_configuration` output. Keep it — you'll need it in the next step.
 
-### 2. Configure main.tf
+### 2. Configure dev/main.tf
 
-> **First-time setup only:** If `main.tf` already exists in your branch, skip to verifying the backend block below.
-
-Copy the example file and edit it:
-
-```bash
-cp main.example main.tf
-```
-
-Fill in the `backend "s3"` block using the `project_s3_configuration` output from the bootstrap step:
+Open `dev/main.tf` and uncomment the `backend "s3"` block, filling in the values from the `project_s3_configuration` output from the bootstrap step:
 
 ```hcl
 backend "s3" {
@@ -58,13 +50,13 @@ backend "s3" {
 }
 ```
 
-Also set the AWS region in the `provider "aws"` block.
+Also uncomment and set the AWS region in the `provider "aws"` block.
 
-### 3. Deploy *(coming soon)*
+### 3. Deploy
 
 ```bash
+cd dev
 terraform init
-terraform plan
 terraform apply
 ```
 
