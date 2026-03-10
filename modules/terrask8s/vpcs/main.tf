@@ -32,10 +32,14 @@ resource "aws_vpc" "main" {
 }
 
 resource "aws_subnet" "terrask8s_subnet" {
-  count             = local.az_count
-  vpc_id            = aws_vpc.main.id
-  cidr_block        = cidrsubnet(var.cidr_block, local.cidr_bits, count.index)
-  availability_zone = data.aws_availability_zones.available.names[count.index]
+  count                   = local.az_count
+  vpc_id                  = aws_vpc.main.id
+  cidr_block              = cidrsubnet(var.cidr_block, local.cidr_bits, count.index)
+  availability_zone       = data.aws_availability_zones.available.names[count.index]
+  map_public_ip_on_launch = true
+  # Note: Nodes will have a public IP address so that we can do experiments
+  #       with the nodes without VPN setup to VPC. This is **another** reason
+  #       this is not an ideal production setup (Use EKS for that)
 
   tags = merge(var.tags, {
     Name        = "terrask8s-subnet-${count.index}"
