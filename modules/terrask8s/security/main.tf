@@ -28,10 +28,18 @@ resource "aws_security_group" "node_access" {
   }
 
   egress {
-    description = "Allow outbound DNS"
+    description = "Allow outbound DNS (UDP)"
     from_port   = 53
     to_port     = 53
     protocol    = "udp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    description = "Allow outbound DNS (TCP, for large responses)"
+    from_port   = 53
+    to_port     = 53
+    protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
