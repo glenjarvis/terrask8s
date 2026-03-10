@@ -4,7 +4,7 @@ variable "project" {
   default     = "terrask8s"
 
   validation {
-    condition     = length(trim(var.project, " ")) > 0
+    condition     = length(trimspace(var.project)) > 0
     error_message = "project must be a non-empty string."
   }
 }
@@ -14,7 +14,7 @@ variable "environment" {
   type        = string
 
   validation {
-    condition     = length(trim(var.environment, " ")) > 0
+    condition     = length(trimspace(var.environment)) > 0
     error_message = "environment must be a non-empty string (e.g. dev, stage, prod)."
   }
 }
