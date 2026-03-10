@@ -49,3 +49,7 @@ resource "aws_security_group" "node_access" {
     Environment = var.environment
   })
 }
+
+output "security_group_id" {
+  value = aws_security_group.node_access.id
+}
