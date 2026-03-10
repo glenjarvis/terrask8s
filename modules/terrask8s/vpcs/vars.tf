@@ -38,10 +38,15 @@ variable "cidr_block" {
   description = "CIDR block for the VPC"
   type        = string
   default     = "10.0.10.0/24"
+
+  validation {
+    condition     = can(cidrhost(var.cidr_block, 0))
+    error_message = "cidr_block must be a valid IPv4 CIDR block (e.g., 10.0.10.0/24)"
+  }
 }
 
 variable "tags" {
   description = "Tags for VPC"
   type        = map(string)
-  default = {}
+  default     = {}
 }
