@@ -19,5 +19,19 @@ terraform {
 }
 
 provider "aws" {
-  #region = "<aws region>"
+  # region = "choose-region"
+}
+
+module "terrask8s_vpc" {
+  source = "../modules/terrask8s/vpcs"
+
+  cidr_block = "10.0.1.0/24"
+  environment = "dev"
+  az_count = 3
+}
+
+module "terrask8s_security" {
+  source = "../modules/terrask8s/security"
+  vpc_id = module.terrask8s_vpc.vpc_id
+  home_office_ip = ["${var.home_office_ip}/32"]
 }
