@@ -9,7 +9,7 @@ variable "home_office_ip" {
 }
 
 variable "ami_id" {
-  description = "AMI ID for the EC2 node. If null, the latest Amazon Linux 2023 AMI is used."
+  description = "AMI ID for the EC2 node. If null, the latest Debian 13 (amd64) AMI is used."
   type        = string
   default     = null
 
