@@ -27,7 +27,7 @@ resource "aws_instance" "node" {
   key_name               = var.key_name
 
   tags = merge(var.tags, {
-    Name        = "terrask8s-node-${count.index}"
+    Name        = "terrask8s-${var.environment}-node-${count.index}"
     Project     = var.project
     Environment = var.environment
   })
