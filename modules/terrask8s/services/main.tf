@@ -1,4 +1,4 @@
-data "aws_ami" "amazon_linux" {
+data "aws_ami" "debian" {
   most_recent = true
   owners      = ["136693071363"] # Official Debian AWS account
 
@@ -20,7 +20,7 @@ data "aws_ami" "amazon_linux" {
 
 resource "aws_instance" "node" {
   count                  = length(var.subnet_ids)
-  ami                    = var.ami_id != null ? var.ami_id : data.aws_ami.amazon_linux.id
+  ami                    = var.ami_id != null ? var.ami_id : data.aws_ami.debian.id
   instance_type          = var.instance_type
   subnet_id              = var.subnet_ids[count.index]
   vpc_security_group_ids = var.security_group_ids
