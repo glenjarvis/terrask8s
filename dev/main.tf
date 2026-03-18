@@ -9,7 +9,7 @@ terraform {
   }
 
   # backend "s3" {
-  #   bucket       = "<bucket name>
+  #   bucket       = "<bucket name>"
   #   key          = "<see output>"
   #   region       = "<see output>"
   #   encrypt      = true

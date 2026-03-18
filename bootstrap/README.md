@@ -6,14 +6,13 @@ If you're new to Terraform, you might ask: "This is Infrastructure as Code — s
 
 I asked the same question when I started, back in 2018. The answer is: yes, almost everything should be. But the S3 bucket and DynamoDB table that *Terraform itself* depends on are a special case.
 
-These two resources are the foundation that every other Terraform operation in this project relies on:
+The S3 bucket is the foundation that every other Terraform operation in this project relies on:
 
-- **S3 bucket** — stores Terraform state for all other modules
-- **DynamoDB table** — provides locking to prevent two deploys from corrupting state simultaneously
+- **S3 bucket** — stores Terraform state for all other modules; also provides native state locking so no two people deploy at the same time (which could cause corruption).
 
-If these resources lived alongside the rest of the infrastructure, a `terraform destroy` on a staging environment could delete the very bucket and lock table that Terraform is using to coordinate that command. That's a chicken-and-egg problem - and a dangerous one.
+If this resource lived alongside the rest of the infrastructure, a `terraform destroy` could delete the very bucket that Terraform is using to coordinate that command. That's a chicken-and-egg problem - and a dangerous one.
 
-So this directory is intentionally isolated. You run it once, take the output, and largely forget about it.
+So this directory is intentionally isolated. You run it once, take the output to put in your main directory, and largely forget about it.
 
 ---
 
@@ -24,17 +23,17 @@ terraform init
 terraform apply
 ```
 
-After `apply` completes, Terraform will print two outputs.
+After `apply` completes, Terraform will print the following output.
 
-**1. `project_s3_configuration`** — the most important one. Copy this `backend "s3"` snippet into the `terraform` block of the main project (not this directory):
+**1. `project_s3_configuration`** — the most important one. Copy this `backend "s3"` block into the `terraform` block of the main project's `dev/main.tf`:
 
 ```hcl
 backend "s3" {
-    bucket         = "<your-bucket>"
-    key            = "global/k8s/terraform.tfstate"
-    region         = "<your-region>"
-    dynamodb_table = "terraform-lock"
-    encrypt        = true
+    bucket       = "<your-bucket>"
+    key          = "global/k8s/terraform.tfstate"
+    region       = "<your-region>"
+    encrypt      = true
+    use_lockfile = true
 }
 ```
 
@@ -52,7 +51,7 @@ This backup is optional, but recommended. If you lose the local `terraform.tfsta
 
 ## Cost
 
-Because Terraform state files are small, the cost of this S3 bucket and DynamoDB table is negligible. In most cases it will be free or a few pennies per month.
+Because Terraform state files are small, the cost of this S3 bucket is negligible. In most cases it will be free or a few pennies per month.
 
 ---
 
@@ -60,12 +59,11 @@ Because Terraform state files are small, the cost of this S3 bucket and DynamoDB
 
 ### Simple approach
 
-The bootstrap creates exactly two AWS resources:
+The bootstrap creates exactly one AWS resource:
 
 - An S3 bucket ending in `-terraform-state`
-- A DynamoDB table named `terraform-lock`
 
-If you've already destroyed everything in the main project, you can delete these two resources by hand in the AWS Console or CLI and you're done.
+If you've already destroyed everything in the main project, you can delete this bucket by hand in the AWS Console or CLI and you're done.
 
 ### For the purist
 
@@ -73,7 +71,7 @@ If you prefer to tear down via `terraform destroy`, there are three safeguards t
 
 1. **AWS requires a bucket to be empty before deletion** — including all previous versions
 2. **This bucket has versioning enabled** — deleting objects leaves behind delete markers and old versions that must also be removed
-3. **`prevent_destroy = true`** is set on both resources to prevent accidental deletion
+3. **`prevent_destroy = true`** is set on the bucket to prevent accidental deletion
 
 Work through them in order.
 
@@ -113,7 +111,7 @@ aws s3api delete-objects \
 
 #### Step 3 — Remove `prevent_destroy`
 
-In `bootstrap.tf`, remove the following block from both the `aws_s3_bucket` and `aws_dynamodb_table` resources:
+In the `bootstrap.tf` file, remove the following block from the `aws_s3_bucket` resource:
 
 ```hcl
 lifecycle {
@@ -140,3 +138,5 @@ When complete, the state file will be reduced to an empty shell:
   "check_results": null
 }
 ```
+
+All resources that you built with this repo are now removed from your AWS account.
