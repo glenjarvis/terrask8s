@@ -1,6 +1,6 @@
 # terrask8s
 
-(terra-skates) Create a Kubernetes cluster on AWS, where you manage the nodes, with Terraform.
+(terra-skates) Create a Kubernetes cluster on AWS using Terraform, where you manage the nodes.
 
 ## Why terrask8s
 
@@ -10,7 +10,7 @@ If you are preparing for the Certified Kubernetes Application Developer (CKAD) o
 
 **A word of caution on managed services:** Large cloud providers offer managed Kubernetes services (Amazon EKS, Azure AKS, etc.) where they manage the underlying nodes for you. For production workloads, a managed service is almost always cheaper, more resilient, and easier to operate than self-managed nodes.
 
-This repository is for learning. If you want to understand what's happening underneath the hood, this is a good place to start.
+This repository is for learning and convenience. If you want access to the Kubernetes nodes and if you want to understand what's happening under the hood, this repo can be a handy tool for you.
 
 ### For me
 
@@ -24,7 +24,9 @@ I've done Terraform, Ansible, and Kubernetes in past jobs, so why not build a Te
 
 ### 1. Bootstrap
 
-Before anything else, you need to create the S3 bucket and DynamoDB table that Terraform will use to store state and coordinate locks. This lives in its own isolated directory to avoid the chicken-and-egg problem of Terraform managing the very resources it depends on.
+If you will be building and destroying this over time (e.g., working through your CKAD), you will probably want your state stored in an S3 bucket. This avoids losing the state that is stored locally by default. The state file is intentionally not stored in the code repository because sensitive information can be stored there.
+
+Before anything else, you need to create the S3 bucket that Terraform will use to store state. This lives in its own isolated directory to avoid the chicken-and-egg problem of Terraform managing the very resources it depends on.
 
 ```bash
 cd bootstrap
@@ -34,19 +36,19 @@ terraform apply
 
 See [bootstrap/README.md](bootstrap/README.md) for full details, including how to back up the bootstrap state and how to tear it down later.
 
-After `apply` completes, Terraform will print a `project_s3_configuration` output. Keep it — you'll need it in the next step.
+After `apply` completes, Terraform will print the `project_s3_configuration` output. Keep it — you'll need it in the next step.
 
 ### 2. Configure dev/main.tf
 
-Open `dev/main.tf` and uncomment the `backend "s3"` block, filling in the values from the `project_s3_configuration` output from the bootstrap step:
+Open `dev/main.tf` and replace the commented (`backend "s3"`) block with the data you just saved above. When you are done, you should have an uncommented backend "s3" section with all fields filled in:
 
 ```hcl
 backend "s3" {
-    bucket         = "<your-bucket>"
-    key            = "global/k8s/terraform.tfstate"
-    region         = "<your-region>"
-    dynamodb_table = "terraform-lock"
-    encrypt        = true
+    bucket       = "<your-bucket>"
+    key          = "global/k8s/terraform.tfstate"
+    region       = "<your-region>"
+    encrypt      = true
+    use_lockfile = true
 }
 ```
 
@@ -68,4 +70,4 @@ terraform apply
 
 ### 2. Tear down bootstrap
 
-Once all main infrastructure is destroyed, follow the tear-down instructions in [bootstrap/README.md](bootstrap/README.md).
+If you have completely finished with this project, you should also remove the S3 bucket. There are instructions on how to do so in the tear-down instructions in [bootstrap/README.md](bootstrap/README.md).

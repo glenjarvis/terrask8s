@@ -8,14 +8,14 @@ terraform {
     }
   }
 
-  #  backend "s3" {
-  #    bucket = "<bucket name>"
-  #    key    = "<see output>"
-  #    region = "<see output>"
-  #
-  #    dynamodb_table = "terraform-lock"
-  #    encrypt        = true
-  #  }
+  # backend "s3" {
+  #   bucket       = "<bucket name>"
+  #   key          = "<see output>"
+  #   region       = "<see output>"
+  #   encrypt      = true
+  #   use_lockfile = true
+  # }
+
 }
 
 provider "aws" {
