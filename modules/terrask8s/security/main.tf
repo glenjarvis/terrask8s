@@ -55,7 +55,7 @@ resource "aws_security_group" "node_access" {
   }
 
   tags = merge(var.tags, {
-    Name        = "terrask8s-${var.environment}-node-access"
+    Name        = "${var.project}-${var.environment}-node-access"
     Project     = var.project
     Environment = var.environment
   })

@@ -25,7 +25,7 @@ resource "aws_vpc" "main" {
   cidr_block = var.cidr_block
 
   tags = merge(var.tags, {
-    Name        = "terrask8s-${var.environment}-vpc"
+    Name        = "${var.project}-${var.environment}-vpc"
     Project     = var.project
     Environment = var.environment
   })
@@ -42,7 +42,7 @@ resource "aws_subnet" "terrask8s_subnet" {
   #       this is not an ideal production setup (Use EKS for that)
 
   tags = merge(var.tags, {
-    Name        = "terrask8s-${var.environment}-subnet-${count.index}"
+    Name        = "${var.project}-${var.environment}-subnet-${count.index}"
     Project     = var.project
     Environment = var.environment
   })
@@ -57,7 +57,7 @@ resource "aws_route_table" "terrask8s" {
   }
 
   tags = merge(var.tags, {
-    Name        = "terrask8s-${var.environment}-route-table"
+    Name        = "${var.project}-${var.environment}-route-table"
     Project     = var.project
     Environment = var.environment
   })
@@ -73,7 +73,7 @@ resource "aws_internet_gateway" "main" {
   vpc_id = aws_vpc.main.id
 
   tags = merge(var.tags, {
-    Name        = "terrask8s-${var.environment}-igw"
+    Name        = "${var.project}-${var.environment}-igw"
     Project     = var.project
     Environment = var.environment
   })
